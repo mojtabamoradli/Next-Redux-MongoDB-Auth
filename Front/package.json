@@ -1,0 +1,39 @@
+{
+  "name": "mm-react",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
+    "date-fns": "^2.29.3",
+    "fs": "^0.0.1-security",
+    "jalali-moment": "^3.3.11",
+    "jwt-decode": "^3.1.2",
+    "melipayamak": "^1.0.5",
+    "net": "^1.0.2",
+    "next": "12.2.5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-phone-number-input": "^3.2.11",
+    "react-redux": "^8.0.2",
+    "react-use": "^17.4.0",
+    "redux": "^4.2.0",
+    "redux-deep-persist": "^1.0.6",
+    "redux-devtools-extension": "^2.13.9",
+    "redux-persist": "^6.0.0",
+    "redux-thunk": "^2.4.1",
+    "styled-components": "^5.3.5",
+    "tls": "^0.0.1"
+  },
+  "devDependencies": {
+    "eslint": "8.23.0",
+    "eslint-config-next": "12.2.5"
+  }
+}

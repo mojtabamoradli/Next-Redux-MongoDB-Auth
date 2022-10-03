@@ -1,0 +1,27 @@
+.featuresContainer1,
+.featuresContainer2 {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.featuresContainer1,
+.featuresContainer2 p {
+  text-align: left;
+}
+
+
+@media (max-width: 760px) {
+    .featuresContainer1,
+    .featuresContainer2 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+    }
+    .featuresContainer2 {
+      padding-right: 15px;
+    }
+  }
+  
