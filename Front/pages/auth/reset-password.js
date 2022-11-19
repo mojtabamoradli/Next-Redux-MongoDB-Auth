@@ -24,8 +24,8 @@ const ResetPassword = () => {
   const [input, setInput] = useState({ password: "" });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [loading, setLoading] = useState(false);
 
-const [user, setUser] = useState({})
 
   useEffect(() => {
     if(router.isReady) {
@@ -52,33 +52,39 @@ const [user, setUser] = useState({})
 
 
 
-  useEffect(() => {
-    if (!errors.password && input.password != "") {
-      axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users`).then((response) => {
-        setUser(response.data.find((user) => user.email === router.query.email));
-      });
-    }
-  }, [input.password, errors.password])
 
 
-
-
-  const submitHandler = async (event) => {
+  const submitHandler =  (event) => {
     event.preventDefault();
     if (!errors.password && input.password != "") {
+      setLoading(true)
 
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users/${user._id}`, {
-          method: "PATCH",
-          body: JSON.stringify({password: bcrypt.hashSync(input.password, bcrypt.genSaltSync(10))}),
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-    
-          failed.current.textContent = "";
-          success.current.textContent = "Password Updated! You Can Now Login With Your New Password.";
+      axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users`).then((response) => {
+        const user = response.data.find((user) => user.email === router.query.email);
 
-      
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users/${user._id}`, {
+         method: "PATCH",
+         body: JSON.stringify({password: bcrypt.hashSync(input.password, bcrypt.genSaltSync(10))}),
+         headers: {
+           "Content-Type": "application/json"
+         }
+       })
+   
+         failed.current.textContent = "";
+         success.current.textContent = "Password Updated! You Can Now Login With Your New Password.";
+
+         axios.post(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/send_mail`, {
+          from: '"Mojtaba Moradli" contact@mojtabamoradli.ir',
+          text: `<p style="font-size: 15px">Your Password for ${input.email} changed at ${new Date().toLocaleDateString("fa-IR-u-nu-latn", { year: "numeric", month: "2-digit", day: "2-digit" })}, ${new Date().toString().substring(15, 21)}</br> If you believe this reset is suspicious, please contact: contact@mojtabamoradli.ir</p>`,
+          to: user.email,
+          subject: `Successful Password Reset`,
+        });
+        setLoading(false)
+
+     
+
+      });
+
 
     } else {
       setTouched({ password: true });
@@ -99,8 +105,8 @@ const [user, setUser] = useState({})
           </div>
 
 
-          <button className={styles.btn} type="submit">
-            Reset Password
+          <button className={loading ? styles.btnLoading : styles.btn} type="submit">
+          {loading ? "Reseting Password..." : "Reset Password"}
           </button>
 
         </form>
