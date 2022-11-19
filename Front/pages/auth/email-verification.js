@@ -13,51 +13,55 @@ useTitle("Email Verification")
 
 
   const success = useRef();
-  const failed = useRef();
 
   const router = useRouter()
 
-
-
   const dispatch = useDispatch();
 
-  const [user, setUser] = useState()
+
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
     if(router.isReady) {
       if (!router.query.email) {
-        router.push("/auth/login")
+        router.push("/auth/login-with-password")
     }
     }
   }, [router.query.email]);
 
 
-  useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users`).then((response) => {
-      setUser(response.data.find((user) => user.email === router.query.email))
-    })
-  }, [router.query.email])
 
-  useEffect(() => {
-      if (user && user.emailVerified) {      
-        success.current.textContent = "Your Email Address is Verified.";
-        failed.current.textContent = "";
-      } else {
-        if(user && !user.emailVerified) {
-          const response = fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users/${user._id}`, {
-          method: "PATCH",
-          body: JSON.stringify({emailVerified: true}),
-          headers: {"Content-Type": "application/json"}
-        })
-          success.current.textContent = "Your Email Address Has Been Verified. You Can Now Login To Your Account.";
-          failed.current.textContent = "";
-          dispatch(logoutSuccess());
-        }
+
+      if (router.query.email) {
+        
+              axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users`).then((response) => {
+                const user = response.data.find((user) => user.email === router.query.email);
+          
+                if (user) {
+                  if (user.emailVerified) {      
+                    setLoading(false)
+                    success.current.textContent = "Your Email Address is Verified.";
+            
+                  } else {
+                      fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users/${user._id}`, {
+                      method: "PATCH",
+                      body: JSON.stringify({emailVerified: true}),
+                      headers: {"Content-Type": "application/json"}
+                    })
+                    setLoading(false)
+                      success.current.textContent = "Your Email Address Has Been Verified. You Can Now Login To Your Account.";
+                      dispatch(logoutSuccess());
+                  }
+                } else {
+                  router.push("/auth/login-with-password")
+                }
+              })
+
       }
-  }, [user && user.emailVerified])
+    
 
-console.log(user)
+
 
 
 
@@ -67,8 +71,8 @@ console.log(user)
           <div className={styles.Msgcontainer}>
 
       <div className={styles.emailVerification}>
-        <h2 className={styles.failed} ref={failed}></h2>
-        <h2 className={styles.success} ref={success}>{!user && "Verifying..."}</h2>
+        <h2 className={styles.success} ref={success}>{loading && "Verifying..."}</h2>
+        
       </div>
       </div>
 
