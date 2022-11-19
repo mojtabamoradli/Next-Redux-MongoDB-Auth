@@ -28,9 +28,9 @@ useTitle("Forgot Password")
   const [input, setInput] = useState({ email: "" });
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [loading, setLoading] = useState(false);
 
 
-  const [user, setUser] = useState({})
 
 
 
@@ -57,38 +57,45 @@ useEffect(() => {
   };
 
 
-  useEffect(() => {
-    if (!errors.email && input.email != "") {
-      axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users`).then((response) => {
-        setUser(response.data.find((user) => user.email === input.email));
-      });
-    }
-  }, [input.email, errors.email])
 
 
   const submitHandler = (event) => {
     event.preventDefault();
     if (!Object.keys(errors).length) {
+      setLoading(true)
 
-      if (!user) {
-        failed.current.textContent = "Wrong Email!";
-        success.current.textContent = "";
-      } 
-      if (user) {
-        success.current.textContent = "Please Check Your Email to Recover Your Account.";
-        failed.current.textContent = "";
-        dispatch(forgotPasswordSuccess());
+      axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/users`).then((response) => {
+        const user = response.data.find((user) => user.email === input.email);
 
+        if (!user) {
+          failed.current.textContent = "Wrong Email!";
+          success.current.textContent = "";
+          setLoading(false)
 
-        if (input.email) {
-          const emailBody = `<h1>Click to Reset Your Password</h1><a href='${process.env.NEXT_PUBLIC_BASE_URL}/auth/reset-password?email=${input.email}'>Reset My Password</a>`;
+        } 
+        if (user) {
+          success.current.textContent = "Please Check Your Email to Recover Your Account.";
+          failed.current.textContent = "";
+          dispatch(forgotPasswordSuccess());
+          setLoading(false)
+
+  
           axios.post(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/send_mail`, {
-            text: emailBody,
+            from: '"Mojtaba Moradli" contact@mojtabamoradli.ir',
+            text: `<p style="font-size: 15px">Click to Reset Your Password</br><a href='${process.env.NEXT_PUBLIC_BASE_URL}/auth/reset-password?email=${input.email}'>Reset My Password</a></p>`,
             to: input.email,
-            subject: "Reset Password",
+            subject: `Reset Password`,
           });
+          window.localStorage.setItem("PasswordResetkey", Math.floor(Math.random() * 10 ** 21).toString(36));
+          window.localStorage.setItem("PasswordResetExpireTime", new Date().getTime())
+
+
         }
-      }
+
+
+      });
+
+
     } else {
       setTouched({ email: true });
     }
@@ -108,8 +115,9 @@ useEffect(() => {
             <p className={styles.errors}>{errors.email && touched.email && errors.email}</p>
           </div>
 
-          <button className={styles.btn} type="submit">
-            Send reset link
+          <button className={loading ? styles.btnLoading : styles.btn} type="submit">
+          {loading ? "Sending reset link..." : "Send reset link"}
+
           </button>
         </form>
           <div className={styles.messageError}>
